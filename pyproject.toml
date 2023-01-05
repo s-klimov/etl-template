@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "etl-base"
+version = "0.1.0"
+description = "etl example by coroutines"
+authors = ["sergey_klimov <s.klimov@bk.ru>"]
+readme = "README.md"
+packages = [{include = "etl_base"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+psycopg2 = "2.9.5"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
