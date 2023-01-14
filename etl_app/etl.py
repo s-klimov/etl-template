@@ -1,7 +1,6 @@
 from functools import wraps
 
 from django.db import connection
-from psycopg2.extras import DictCursor
 
 SQL = """select id, number from etl.source"""
 
@@ -24,8 +23,7 @@ def extract(batch):
 
     """
 
-    dbs = dict(dbname='demo', user='sergei', password='sergei', host='localhost')
-    with connection.cursor(cursor_factory=DictCursor) as cursor:
+    with connection.cursor() as cursor:
         cursor.execute(SQL)
         record = cursor.fetchone()  # можно использовать fetchmany, чтобы извлекать данные "пачками"
         while record:
@@ -37,10 +35,10 @@ def extract(batch):
 def transform(batch):
     while record := (yield):
 
-        new_number = record["number"] ** 2
-        if record["number"] % 2 == 0:
+        new_number = record[1] ** 2
+        if record[1] % 2 == 0:
             foo = "an even number"
-        elif record["number"] == 3:
+        elif record[1] == 3:
             print("skip load stage")
             continue
         else:

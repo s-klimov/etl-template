@@ -8,4 +8,3 @@ def etl_task():
     unloads = etl.load()
     multiplication = etl.transform(unloads)
     etl.extract(multiplication)
-
