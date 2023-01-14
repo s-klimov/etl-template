@@ -1,8 +1,7 @@
 from functools import wraps
 
-import psycopg2
+from django.db import connection
 from psycopg2.extras import DictCursor
-
 
 SQL = """select id, number from etl.source"""
 
@@ -26,13 +25,12 @@ def extract(batch):
     """
 
     dbs = dict(dbname='demo', user='sergei', password='sergei', host='localhost')
-    with psycopg2.connect(**dbs) as connection:
-        with connection.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(SQL)
-            record = cursor.fetchone()  # можно использовать fetchmany, чтобы извлекать данные "пачками"
-            while record:
-                batch.send(record)  # следим за тем, чтобы аргументом был итерируемый объект
-                record = cursor.fetchone()
+    with connection.cursor(cursor_factory=DictCursor) as cursor:
+        cursor.execute(SQL)
+        record = cursor.fetchone()  # можно использовать fetchmany, чтобы извлекать данные "пачками"
+        while record:
+            batch.send(record)  # следим за тем, чтобы аргументом был итерируемый объект
+            record = cursor.fetchone()
 
 
 @coroutine
