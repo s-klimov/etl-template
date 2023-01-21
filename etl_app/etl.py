@@ -1,3 +1,4 @@
+from collections import namedtuple
 from functools import wraps
 
 from django.db import connection
@@ -25,9 +26,14 @@ def extract(batch):
 
     with connection.cursor() as cursor:
         cursor.execute(SQL)
+        desc = cursor.description
+        nt_result = namedtuple('Result', [col[0] for col in desc])
+
         record = cursor.fetchone()  # можно использовать fetchmany, чтобы извлекать данные "пачками"
         while record:
-            batch.send(record)  # следим за тем, чтобы аргументом был итерируемый объект
+            batch.send(
+                nt_result(*record)  # следим за тем, чтобы аргументом был итерируемый объект
+            )
             record = cursor.fetchone()
 
 
@@ -35,10 +41,10 @@ def extract(batch):
 def transform(batch):
     while record := (yield):
 
-        new_number = record[1] ** 2
-        if record[1] % 2 == 0:
+        new_number = record.number ** 2
+        if record.number % 2 == 0:
             foo = "an even number"
-        elif record[1] == 3:
+        elif record.number == 3:
             print("skip load stage")
             continue
         else:
@@ -52,7 +58,7 @@ def load():
     while subject := (yield):
         match subject:
             case (int(number), str(bar)):
-                print("the square of", bar, number)
+                print(f"the square of {bar}: {number}")
             case (int(number), int(bar)):
                 print(number)
             case _:
