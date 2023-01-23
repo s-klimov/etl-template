@@ -1,9 +1,12 @@
 from collections import namedtuple
 from functools import wraps
 
+from celery.utils.log import get_task_logger
 from django.db import connection
 
 SQL = """select id, number from etl.source"""
+
+logger = get_task_logger(__name__)
 
 
 def coroutine(func):
@@ -45,7 +48,7 @@ def transform(batch):
         if record.number % 2 == 0:
             foo = "an even number"
         elif record.number == 3:
-            print("skip load stage")
+            logger.info("skip load stage")
             continue
         else:
             foo = 0
@@ -58,8 +61,8 @@ def load():
     while subject := (yield):
         match subject:
             case (int(number), str(bar)):
-                print(f"the square of {bar}: {number}")
+                logger.info(f"the square of {bar}: {number}")
             case (int(number), int(bar)):
-                print(number)
+                logger.info(number)
             case _:
                 raise SyntaxError(f"Unknown structure of {subject=}")
