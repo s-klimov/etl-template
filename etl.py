@@ -1,23 +1,24 @@
+from collections.abc import Generator
 from functools import wraps
+from typing import Tuple, Dict, Any
 
 import psycopg2
-from psycopg2.extras import DictCursor
-
+from psycopg2.extras import DictCursor, DictRow
 
 SQL = """select id, number from etl.source"""
 
 
 def coroutine(func):
     @wraps(func)
-    def inner(*args, **kwargs):
-        fn = func(*args, **kwargs)
+    def inner(*args:tuple[Any, ...], **kwargs: dict[str, Any]) -> Generator:
+        fn: Generator = func(*args, **kwargs)
         next(fn)
         return fn
 
     return inner
 
 
-def extract(batch):
+def extract(batch: Generator) -> None:
     """ Извлекает из БД строки и передает их в генератор
 
     Args:
@@ -25,7 +26,7 @@ def extract(batch):
 
     """
 
-    dbs = dict(dbname='demo', user='sergei', password='sergei', host='localhost')
+    dbs: Dict = dict(dbname='demo', user='sergei', password='sergei', host='localhost')
     with psycopg2.connect(**dbs) as connection:
         with connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(SQL)
@@ -36,7 +37,10 @@ def extract(batch):
 
 
 @coroutine
-def transform(batch):
+def transform(batch: Generator) -> Generator[None, DictRow, None]:
+
+    foo: int | str  # инструкция для mypy
+
     while record := (yield):
 
         new_number = record["number"] ** 2
@@ -52,7 +56,7 @@ def transform(batch):
 
 
 @coroutine
-def load():
+def load() -> Generator[None, Tuple, None]:
     while subject := (yield):
         match subject:
             case (int(number), str(bar)):
