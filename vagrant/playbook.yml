@@ -1,0 +1,106 @@
+---
+- hosts: all
+  vars:
+    app_settings_dir: config
+    postgres_user: sergei
+    postgres_password: sergei
+    postgres_db: demo
+  roles:
+    - role: staticdev.pyenv
+      pyenv_shellrc_file: "{{ ansible_env.HOME }}/.shrc"
+      pyenv_path: "{{ ansible_env.HOME }}/.pyenv"
+      pyenvrc_path: "{{ ansible_env.HOME }}"
+      pyenv_global:
+        - 3.11.0
+        - 3.10.8
+      pyenv_enable_autocompletion: true
+      pyenv_python_versions:
+        - 3.11.0
+        - 3.10.8
+      pyenv_virtualenvs:
+        - venv_name: latest_v311
+          py_version: 3.11.0
+        - venv_name: latest_v310
+          py_version: 3.10.8
+  tasks:
+    - name: add GPG key
+      ansible.builtin.apt_key:
+        url: https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280
+        id: 68576280
+        state: present
+      become: yes
+
+    - name: Install base needed apt-packages
+      ansible.builtin.apt:
+        pkg:
+          - wget
+          - unzip
+          - redis-server
+        state: latest
+      become: yes
+      become_method: sudo
+
+    - name: Install PostgreSQL
+      ansible.builtin.apt:
+        pkg:
+          - postgresql
+          - postgresql-contrib
+          - postgresql-server-dev-all
+          - python3-psycopg2
+          - acl
+        state: latest
+      become: yes
+      become_method: sudo
+
+    - name: Start and enable postgres
+      ansible.builtin.service:
+        name: postgresql
+        enabled: yes
+        state: started
+      become: yes
+
+    - name: Create user
+      community.postgresql.postgresql_user:
+        name: "{{ postgres_user }}"
+        password: "{{ postgres_password }}"
+      become: yes
+      become_user: postgres
+
+    - name: Create db
+      include_tasks: postgres.yml
+
+    - name: Ensure Redis is started
+      service: name=redis-server state=started enabled=yes
+      become: yes
+      become_method: sudo
+
+    - name: Exporting broker url to env
+      lineinfile:
+        dest: "/etc/environment"
+        state: present
+        regexp: "^REDIS_URL="
+        line: "REDIS_URL=redis://127.0.0.1:6379/0"
+      become: yes
+      become_method: sudo
+
+    - name: Exporting db url to env
+      lineinfile:
+        dest: "/etc/environment"
+        state: present
+        regexp: "^DATABASE_URL="
+        line: "DATABASE_URL=postgres://{{ postgres_user }}:{{ postgres_password }}@127.0.0.1:5432/{{ postgres_db }}"
+      become: yes
+      become_method: sudo
+
+    - name: Make settings file from template
+      template:
+        src: /vagrant/vagrant/templates/settings_local.j2
+        dest: "/vagrant/{{ app_settings_dir }}/settings_local.py"
+
+  handlers:
+    - name: postgresql restart
+      ansible.builtin.service:
+        name: postgresql
+        enabled: yes
+        state: restart
+        become: yes

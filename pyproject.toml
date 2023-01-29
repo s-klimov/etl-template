@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "etl example by coroutines"
 authors = ["sergey_klimov <s.klimov@bk.ru>"]
 readme = "README.md"
-packages = [{include = "etl_base"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

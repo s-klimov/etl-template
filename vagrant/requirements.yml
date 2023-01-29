@@ -1,0 +1,2 @@
+# https://github.com/staticdev/ansible-role-pyenv
+- role: staticdev.pyenv

@@ -1,0 +1,23 @@
+---
+- name: Add postgreuser permission for createbd
+  become: true
+  become_user: postgres
+  shell: psql -U postgres -c 'ALTER USER {{ postgres_user }} CREATEDB'
+
+- name: Create database
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: "{{ postgres_db }}"
+    encoding: UTF-8
+    owner: "{{ postgres_user }}"
+
+- name: Create schemas
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_schema:
+    db: "{{ postgres_db }}"
+    name:
+      - main
+      - my_schema
+    owner: "{{ postgres_user }}"
