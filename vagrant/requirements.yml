@@ -1,2 +1,2 @@
-# https://github.com/staticdev/ansible-role-pyenv
-- role: staticdev.pyenv
+- name: staticdev.python-developer
+  src: https://github.com/staticdev/ansible-role-python-developer.git

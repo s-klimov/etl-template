@@ -5,23 +5,14 @@
     postgres_user: sergei
     postgres_password: sergei
     postgres_db: demo
+    python_version: 3.10.6
   roles:
-    - role: staticdev.pyenv
-      pyenv_shellrc_file: "{{ ansible_env.HOME }}/.shrc"
-      pyenv_path: "{{ ansible_env.HOME }}/.pyenv"
-      pyenvrc_path: "{{ ansible_env.HOME }}"
-      pyenv_global:
-        - 3.11.0
-        - 3.10.8
-      pyenv_enable_autocompletion: true
-      pyenv_python_versions:
-        - 3.11.0
-        - 3.10.8
-      pyenv_virtualenvs:
-        - venv_name: latest_v311
-          py_version: 3.11.0
-        - venv_name: latest_v310
-          py_version: 3.10.8
+    - role: staticdev.python-developer
+      vars:
+        pyenv_global:
+          - "{{ python_version }}"
+        pyenv_python_versions:
+          - "{{ python_version }}"
   tasks:
     - name: add GPG key
       ansible.builtin.apt_key:
@@ -96,6 +87,16 @@
       template:
         src: /vagrant/vagrant/templates/settings_local.j2
         dest: "/vagrant/{{ app_settings_dir }}/settings_local.py"
+
+    - name: set python version for project
+      ansible.builtin.command: /home/vagrant/.local/bin/poetry env use /home/vagrant/pyenv/shims/python
+      args:
+        chdir: /vagrant/
+
+    - name: install dependecies for project
+      ansible.builtin.command: /home/vagrant/.local/bin/poetry install
+      args:
+        chdir: /vagrant/
 
   handlers:
     - name: postgresql restart
