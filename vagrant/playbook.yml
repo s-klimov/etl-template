@@ -34,7 +34,7 @@
       become: yes
       become_method: sudo
 
-    - name: Set up Postgres 14 repo
+    - name: Set up Postgres repo
       shell: |
         echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
         wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
