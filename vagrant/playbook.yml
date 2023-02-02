@@ -27,21 +27,26 @@
           - wget
           - unzip
           - redis-server
-        state: latest
-      become: yes
-      become_method: sudo
-
-    - name: Install PostgreSQL
-      ansible.builtin.apt:
-        pkg:
-          - postgresql
-          - postgresql-contrib
-          - postgresql-server-dev-all
+          - wget
           - python3-psycopg2
           - acl
         state: latest
       become: yes
       become_method: sudo
+
+    - name: Set up Postgres 14 repo
+      shell: |
+        echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+      args:
+        warn: no
+      become: yes
+
+    - name: Install postgresql
+      apt:
+        name: postgresql-15
+        update_cache: yes
+      become: yes
 
     - name: Start and enable postgres
       ansible.builtin.service:
@@ -93,10 +98,6 @@
       args:
         chdir: /vagrant/
 
-    - name: install dependecies for project
-      ansible.builtin.command: /home/vagrant/.local/bin/poetry install
-      args:
-        chdir: /vagrant/
 
   handlers:
     - name: postgresql restart
