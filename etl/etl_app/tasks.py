@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from etl_app import etl
+from etl.etl_app import etl
 
 
 @shared_task(name="Задача ETL")

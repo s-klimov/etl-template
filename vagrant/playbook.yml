@@ -30,6 +30,7 @@
           - wget
           - python3-psycopg2
           - acl
+          - libpq-dev
         state: latest
       become: yes
       become_method: sudo
@@ -91,7 +92,7 @@
     - name: Make settings file from template
       template:
         src: /vagrant/vagrant/templates/settings_local.j2
-        dest: "/vagrant/{{ app_settings_dir }}/settings_local.py"
+        dest: "/vagrant/etl/{{ app_settings_dir }}/settings_local.py"
 
     - name: set python version for project
       ansible.builtin.command: /home/vagrant/.local/bin/poetry env use /home/vagrant/pyenv/shims/python
