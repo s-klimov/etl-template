@@ -12,4 +12,4 @@ migrate:
 
 # запустить сервер разработки
 runserver:
-	vagrant ssh -c "cd /vagrant/etl && poetry run python manage.py runserver 0.0.0.0:8282"
+	vagrant ssh -c "cd /vagrant/etl && poetry run python manage.py runserver 0.0.0.0:8000"
