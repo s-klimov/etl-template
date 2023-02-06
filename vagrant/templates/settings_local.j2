@@ -1,1 +1,20 @@
 """Локальные настройки проекта"""
+import os
+import dj_database_url
+
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = {{ debug|lower|capitalize }}
+
+
+# Database
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+default_db = dj_database_url.parse(
+    os.environ['DATABASE_URL']
+)
+DATABASES = {'default': default_db}
+if DATABASES.get("default"):
+    DATABASES["default"].update({"OPTIONS": {"options": "-c search_path=public,etl"}})
+
+
+BROKER_URL = os.environ['REDIS_URL']

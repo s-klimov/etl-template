@@ -6,6 +6,7 @@
     postgres_password: sergei
     postgres_db: demo
     python_version: 3.10.6
+    debug: true
   roles:
     - role: staticdev.python-developer
       vars:
@@ -98,12 +99,3 @@
       ansible.builtin.command: /home/vagrant/.local/bin/poetry env use /home/vagrant/pyenv/shims/python
       args:
         chdir: /vagrant/
-
-
-  handlers:
-    - name: postgresql restart
-      ansible.builtin.service:
-        name: postgresql
-        enabled: yes
-        state: restart
-        become: yes
