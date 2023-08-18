@@ -8,12 +8,14 @@ packages = [{include = "etl_base"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-psycopg2 = "2.9.5"
-types-psycopg2 = "^2.9.21.4"
+anyio = "^3.7.1"
+asyncpg = "^0.28.0"
+asyncpg-stubs = "^0.28.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
 mypy = "^0.991"
+black = "^23.7.0"
 
 [build-system]
 requires = ["poetry-core"]
